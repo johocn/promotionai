@@ -20,6 +20,7 @@ PromotionAI/
 - **主需求文档**: `docs/financial-health-content-system.md`
 - **项目概览**: `docs/overview.md`
 - **项目结构说明**: `docs/structure.md`
+- **Git设置说明**: `docs/git-setup.md`
 - **项目状态报告**: `status.md`
 - **完整功能概览**: `docs/complete-feature-overview.md`
 - **实施总览**: `docs/project-implementation-summary.md`
