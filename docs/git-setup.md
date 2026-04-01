@@ -1,7 +1,7 @@
 # PromotionAI 项目 Git 配置说明
 
 ## 仓库信息
-- **远程仓库**: git@github.com:johocn/news.git
+- **远程仓库**: git@github.com:johocn/promotionai.git
 - **本地路径**: /home/admin/.openclaw/workspace/PromotionAI
 - **分支**: master (已设置为跟踪 origin/master)
 
