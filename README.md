@@ -1,6 +1,11 @@
-# PromotionAI 项目目录
+# PromotionAI 项目
 
-这是 PromotionAI 项目的主目录，包含以下子目录：
+**PromotionAI** 是一个基于AI技术的智能内容营销平台，专注于财经/健康领域的资讯采集、智能处理、多渠道分发和效果追踪。
+
+## Git 仓库信息
+
+- **远程仓库**: git@github.com:johocn/promotionai.git
+- **分支**: master
 
 ## 目录结构
 
@@ -15,6 +20,8 @@
 
 PromotionAI 是一个基于AI技术的智能内容营销平台，专注于财经/健康领域的资讯采集、智能处理、多渠道分发和效果追踪。
 
-有关项目的详细信息，请参阅上级目录中的主文档：
-- `financial-health-content-system.md` - 主需求方案
-- `financial-health-content-system-complete.md` - 完整需求方案
+有关项目的详细信息，请参阅以下文档：
+- `docs/financial-health-content-system.md` - 主需求方案
+- `docs/overview.md` - 项目概览
+- `docs/structure.md` - 项目结构说明
+- `docs/git-setup.md` - Git配置说明
