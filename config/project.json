@@ -1,0 +1,23 @@
+{
+  "project": {
+    "name": "PromotionAI",
+    "version": "1.0.0",
+    "description": "AI驱动的智能促销系统",
+    "main": "index.js",
+    "directories": {
+      "doc": "docs",
+      "src": "src",
+      "test": "tests"
+    },
+    "keywords": [
+      "AI",
+      "marketing",
+      "content",
+      "promotion",
+      "finance",
+      "health"
+    ],
+    "author": "OpenClaw AI Assistant",
+    "license": "MIT"
+  }
+}
