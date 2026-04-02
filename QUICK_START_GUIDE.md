@@ -17,12 +17,24 @@
 
 ## 启动步骤
 
-### 1. 配置nginx反向代理
+### 1. 初始化数据库
 
-首先，将nginx配置应用到您的nginx服务器：
+首先，使用现有数据库创建新的"mo"数据库：
 
 ```bash
-# 复制nginx配置到nginx目录
+# 确保脚本有执行权限
+chmod +x init-mo-db.sh
+
+# 初始化mo数据库
+./init-mo-db.sh
+```
+
+### 2. 配置nginx反向代理
+
+将nginx配置应用到您的nginx服务器：
+
+```bash
+# 复nginx配置到nginx目录
 sudo cp nginx-config.conf /etc/nginx/sites-available/promotionai.conf
 
 # 创建软链接启用站点
@@ -35,16 +47,16 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 2. 启动PromotionAI服务
+### 3. 启动PromotionAI服务
 
 运行启动脚本来启动所有服务：
 
 ```bash
 # 确保脚本有执行权限
-chmod +x start-promotionai-services.sh
+chmod +x start-promotionai-with-existing-db.sh
 
 # 启动服务
-./start-promotionai-services.sh
+./start-promotionai-with-existing-db.sh
 ```
 
 ### 3. 验证服务状态
