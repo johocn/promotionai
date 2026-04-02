@@ -1,0 +1,35 @@
+# docker/Dockerfile.collector
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 安装Chrome依赖（用于Puppeteer）
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# 设置Puppeteer跳过下载
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# 复制package文件
+COPY package*.json ./
+
+# 安装依赖
+RUN npm ci --only=production
+
+# 复制应用代码
+COPY src/collector/ ./src/collector/
+COPY config/ ./config/
+
+# 创建日志目录
+RUN mkdir -p logs
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

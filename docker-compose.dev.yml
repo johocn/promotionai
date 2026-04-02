@@ -1,0 +1,285 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15
+    container_name: promotionai-postgres
+    environment:
+      POSTGRES_DB: promotionai_dev
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - promotionai-network
+    restart: always
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=100
+      -c random_page_cost=1.1
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: promotionai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - promotionai-network
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+
+  # MongoDB数据库
+  mongodb:
+    image: mongo:6.0
+    container_name: promotionai-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: dev_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - promotionai-network
+    restart: always
+
+  # 向量数据库 (PGVector)
+  pgvector:
+    image: ankane/pgvector:pg15
+    container_name: promotionai-pgvector
+    environment:
+      POSTGRES_DB: vector_db
+      POSTGRES_USER: vector_user
+      POSTGRES_PASSWORD: vector_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - vector_data:/var/lib/postgresql/data
+    networks:
+      - promotionai-network
+    restart: always
+
+  # 消息队列 (RabbitMQ)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: promotionai-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - promotionai-network
+    restart: always
+
+  # Elasticsearch (用于日志和搜索)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: promotionai-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - promotionai-network
+    restart: always
+
+  # Kibana (日志分析)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: promotionai-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - promotionai-network
+    restart: always
+
+  # Prometheus (监控)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: promotionai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - promotionai-network
+    restart: always
+
+  # Grafana (可视化)
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: promotionai-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    networks:
+      - promotionai-network
+    restart: always
+
+  # 应用服务 (开发环境)
+  app-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.collector
+    container_name: promotionai-collector
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - MONGODB_URI=mongodb://mongodb:27017/promotionai_dev
+    depends_on:
+      - postgres
+      - redis
+      - mongodb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+
+  app-ai-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai-processor
+    container_name: promotionai-ai-processor
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+
+  app-publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
+    container_name: promotionai-publisher
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+
+  app-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile.tracker
+    container_name: promotionai-tracker
+    ports:
+      - "3004:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - MONGODB_URI=mongodb://mongodb:27017/promotionai_logs
+    depends_on:
+      - postgres
+      - redis
+      - mongodb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+
+  app-api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.api-gateway
+    container_name: promotionai-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+      - app-collector
+      - app-ai-processor
+      - app-publisher
+      - app-tracker
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:
+  vector_data:
+  rabbitmq_data:
+  es_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  promotionai-network:
+    driver: bridge

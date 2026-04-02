@@ -1,0 +1,141 @@
+{
+  "prometheus": {
+    "enabled": true,
+    "endpoint": "/metrics",
+    "collectDefaultMetrics": true,
+    "timeout": 5000
+  },
+  "grafana": {
+    "enabled": true,
+    "url": "${GRAFANA_URL}",
+    "apiKey": "${GRAFANA_API_KEY}"
+  },
+  "metrics": {
+    "http": {
+      "requestsTotal": {
+        "name": "http_requests_total",
+        "help": "Total number of HTTP requests",
+        "labelNames": ["method", "route", "statusCode"]
+      },
+      "requestDuration": {
+        "name": "http_request_duration_seconds",
+        "help": "Duration of HTTP requests in seconds",
+        "buckets": [0.1, 0.5, 1, 2, 5, 10]
+      },
+      "responseSize": {
+        "name": "http_response_size_bytes",
+        "help": "Size of HTTP responses in bytes",
+        "buckets": [100, 500, 1000, 5000, 10000]
+      }
+    },
+    "database": {
+      "connections": {
+        "name": "database_connections",
+        "help": "Database connections count",
+        "labelNames": ["database", "status"]
+      },
+      "queries": {
+        "name": "database_queries_total",
+        "help": "Total number of database queries",
+        "labelNames": ["database", "operation"]
+      },
+      "queryDuration": {
+        "name": "database_query_duration_seconds",
+        "help": "Duration of database queries in seconds",
+        "buckets": [0.01, 0.05, 0.1, 0.5, 1, 2, 5]
+      }
+    },
+    "cache": {
+      "hits": {
+        "name": "cache_hits_total",
+        "help": "Cache hits count",
+        "labelNames": ["cache", "type"]
+      },
+      "misses": {
+        "name": "cache_misses_total",
+        "help": "Cache misses count",
+        "labelNames": ["cache", "type"]
+      }
+    },
+    "ai": {
+      "apiCalls": {
+        "name": "ai_api_calls_total",
+        "help": "Total number of AI API calls",
+        "labelNames": ["provider", "model"]
+      },
+      "responseTime": {
+        "name": "ai_response_time_seconds",
+        "help": "AI API response time in seconds",
+        "buckets": [0.1, 0.5, 1, 2, 5, 10, 20]
+      },
+      "tokensUsed": {
+        "name": "ai_tokens_used_total",
+        "help": "Total number of tokens used",
+        "labelNames": ["provider", "model", "type"]
+      }
+    }
+  },
+  "healthChecks": {
+    "enabled": true,
+    "endpoint": "/health",
+    "checks": {
+      "database": {
+        "timeout": 5000,
+        "interval": 30000
+      },
+      "redis": {
+        "timeout": 5000,
+        "interval": 30000
+      },
+      "externalServices": {
+        "timeout": 10000,
+        "interval": 60000
+      }
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "transports": {
+      "console": {
+        "enabled": true,
+        "level": "debug"
+      },
+      "file": {
+        "enabled": true,
+        "level": "info",
+        "filename": "logs/app.log",
+        "maxsize": 10485760,
+        "maxFiles": 5
+      },
+      "errorFile": {
+        "enabled": true,
+        "level": "error",
+        "filename": "logs/error.log",
+        "maxsize": 10485760,
+        "maxFiles": 5
+      }
+    }
+  },
+  "alerts": {
+    "thresholds": {
+      "highResponseTime": 2.0,
+      "highErrorRate": 0.05,
+      "lowAvailability": 0.95
+    },
+    "notifications": {
+      "email": {
+        "enabled": true,
+        "addresses": ["admin@promotionai.com"]
+      },
+      "slack": {
+        "enabled": false,
+        "webhookUrl": "${SLACK_WEBHOOK_URL}"
+      },
+      "dingtalk": {
+        "enabled": true,
+        "webhookUrl": "${DINGTALK_WEBHOOK_URL}"
+      }
+    }
+  }
+}

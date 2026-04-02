@@ -2,22 +2,58 @@
   "project": {
     "name": "PromotionAI",
     "version": "1.0.0",
-    "description": "AI驱动的智能促销系统",
-    "main": "index.js",
-    "directories": {
-      "doc": "docs",
-      "src": "src",
-      "test": "tests"
+    "description": "AI驱动的智能内容营销平台",
+    "repository": "git@github.com:johocn/promotionai.git"
+  },
+  "services": {
+    "collector": {
+      "port": 3001,
+      "name": "News Collector Service"
     },
-    "keywords": [
-      "AI",
-      "marketing",
-      "content",
-      "promotion",
-      "finance",
-      "health"
-    ],
-    "author": "OpenClaw AI Assistant",
-    "license": "MIT"
+    "aiProcessor": {
+      "port": 3002,
+      "name": "AI Processing Service"
+    },
+    "publisher": {
+      "port": 3003,
+      "name": "Content Publishing Service"
+    },
+    "tracker": {
+      "port": 3004,
+      "name": "Tracking Service"
+    },
+    "apiGateway": {
+      "port": 3000,
+      "name": "API Gateway Service"
+    }
+  },
+  "database": {
+    "postgres": {
+      "host": "localhost",
+      "port": 5432,
+      "database": "promotionai_db"
+    },
+    "redis": {
+      "host": "localhost",
+      "port": 6379
+    },
+    "mongodb": {
+      "uri": "mongodb://localhost:27017/promotionai"
+    }
+  },
+  "security": {
+    "jwtExpiry": "24h",
+    "encryptionAlgorithm": "aes-256-gcm",
+    "hashAlgorithm": "sha256"
+  },
+  "monitoring": {
+    "enabled": true,
+    "metricsEndpoint": "/metrics",
+    "healthCheckEndpoint": "/health"
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "transports": ["console", "file"]
   }
 }

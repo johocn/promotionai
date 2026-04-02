@@ -15,7 +15,7 @@ PromotionAI 是一个基于AI技术的智能内容营销平台，专注于财经
 
 ## 技术架构
 - **后端**: Node.js + Koa / Python + FastAPI
-- **数据库**: MySQL + Redis + MongoDB + 向量数据库
+- **数据库**: PostgreSQL + Redis + MongoDB + PGVector
 - **AI服务**: OpenAI API / 本地模型
 - **前端**: Vue3 + Element Plus
 - **监控**: Prometheus + Grafana

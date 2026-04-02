@@ -1,0 +1,14 @@
+{
+  "name": "promotionai-dev",
+  "scripts": {
+    "dev": "concurrently \"npm run start:collector\" \"npm run start:ai-processor\" \"npm run start:publisher\" \"npm run start:tracker\" \"npm run start:api-gateway\"",
+    "start:collector": "cd src/collector && nodemon server.js",
+    "start:ai-processor": "cd src/ai-processor && nodemon server.js",
+    "start:publisher": "cd src/publisher && nodemon server.js",
+    "start:tracker": "cd src/tracker && nodemon server.js",
+    "start:api-gateway": "cd src/api-gateway && nodemon server.js",
+    "test": "jest",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write ."
+  }
+}

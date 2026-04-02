@@ -1,0 +1,59 @@
+{
+  "development": {
+    "client": "postgresql",
+    "connection": {
+      "host": "localhost",
+      "port": 5432,
+      "database": "promotionai_dev",
+      "user": "dev_user",
+      "password": "dev_password"
+    },
+    "pool": {
+      "min": 2,
+      "max": 10
+    },
+    "migrations": {
+      "tableName": "knex_migrations",
+      "directory": "./migrations",
+      "extension": "js"
+    }
+  },
+  "production": {
+    "client": "postgresql",
+    "connection": {
+      "host": "${DB_HOST}",
+      "port": "${DB_PORT}",
+      "database": "${DB_NAME}",
+      "user": "${DB_USER}",
+      "password": "${DB_PASSWORD}"
+    },
+    "pool": {
+      "min": 5,
+      "max": 20
+    },
+    "migrations": {
+      "tableName": "knex_migrations",
+      "directory": "./migrations",
+      "extension": "js"
+    }
+  },
+  "test": {
+    "client": "postgresql",
+    "connection": {
+      "host": "localhost",
+      "port": 5432,
+      "database": "promotionai_test",
+      "user": "test_user",
+      "password": "test_password"
+    },
+    "pool": {
+      "min": 1,
+      "max": 5
+    },
+    "migrations": {
+      "tableName": "knex_migrations",
+      "directory": "./migrations",
+      "extension": "js"
+    }
+  }
+}
