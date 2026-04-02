@@ -1,0 +1,256 @@
+version: '3.8'
+
+services:
+  # API网关服务 (端口 3010)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api-gateway
+    container_name: promotionai-api-gateway
+    ports:
+      - "3010:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_prod}
+      - DB_USER=${DB_USER:-prod_user}
+      - DB_PASSWORD=${DB_PASSWORD:-prod_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - COLLECTOR_PORT=3011
+      - AI_PROCESSOR_PORT=3012
+      - PUBLISHER_PORT=3013
+      - TRACKER_PORT=3014
+      - HEALTH_CHECK_PORT=3015
+      - JWT_SECRET=${JWT_SECRET:-production_jwt_secret}
+      - API_RATE_LIMIT=${API_RATE_LIMIT:-100}
+      - API_RATE_WINDOW_MS=${API_RATE_WINDOW_MS:-900000}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 资讯采集服务 (端口 3011)
+  collector:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.collector
+    container_name: promotionai-collector
+    ports:
+      - "3011:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - COLLECTOR_PORT=3011
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_prod}
+      - DB_USER=${DB_USER:-prod_user}
+      - DB_PASSWORD=${DB_PASSWORD:-prod_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - COLLECTOR_INTERVAL_MINUTES=${COLLECTOR_INTERVAL_MINUTES:-30}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # AI处理服务 (端口 3012)
+  ai-processor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ai-processor
+    container_name: promotionai-ai-processor
+    ports:
+      - "3012:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AI_PROCESSOR_PORT=3012
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_prod}
+      - DB_USER=${DB_USER:-prod_user}
+      - DB_PASSWORD=${DB_PASSWORD:-prod_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-turbo}
+      - AI_TEMPERATURE=${AI_TEMPERATURE:-0.7}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS:-2000}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 内容分发服务 (端口 3013)
+  publisher:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.publisher
+    container_name: promotionai-publisher
+    ports:
+      - "3013:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PUBLISHER_PORT=3013
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_prod}
+      - DB_USER=${DB_USER:-prod_user}
+      - DB_PASSWORD=${DB_PASSWORD:-prod_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PUBLISH_DELAY_SECONDS=${PUBLISH_DELAY_SECONDS:-5}
+      - MAX_PUBLISH_RETRIES=${MAX_PUBLISH_RETRIES:-3}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 追踪服务 (端口 3014)
+  tracker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.tracker
+    container_name: promotionai-tracker
+    ports:
+      - "3014:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TRACKER_PORT=3014
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_prod}
+      - DB_USER=${DB_USER:-prod_user}
+      - DB_PASSWORD=${DB_PASSWORD:-prod_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TRACKING_DOMAIN=${TRACKING_DOMAIN:-localhost:3014}
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 健康检查服务 (端口 3015) - 这供统一健康检查
+  health-check:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api-gateway
+    container_name: promotionai-health-check
+    ports:
+      - "3015:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HEALTH_CHECK_ONLY=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - promotionai-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15
+    container_name: promotionai-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-promotionai_prod}
+      POSTGRES_USER: ${DB_USER:-prod_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-prod_password}
+    ports:
+      - "5435:5432"  # 使用备用端口以避免冲突
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - promotionai-network
+    restart: always
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c work_mem=4MB
+      -c maintenance_work_mem=64MB
+      -c max_connections=100
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: promotionai-redis
+    ports:
+      - "6381:6379"  # 使用备用端口以避免冲突
+    volumes:
+      - redis_data:/data
+    networks:
+      - promotionai-network
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  promotionai-network:
+    driver: bridge
