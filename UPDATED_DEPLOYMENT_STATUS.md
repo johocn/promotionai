@@ -51,12 +51,17 @@ PromotionAI是一个AI驱动的智能内容营销平台，专注于财经/健康
 ## 🛠️ 解决方案
 
 ### 问题解决
-- ✅ **端口冲突问题**: 使用备用端口 (3010-3015, 6381) 避免与现有服务冲突
+- ✅ **端口冲突问题**: 使用备用应用端口 (3010-3015)，避免与现有服务冲突
 - ✅ **数据库方案**: 使用现有的5432端口数据库，创建新的"mo"数据库供PromotionAI使用
+- ✅ **Redis方案**: 使用现有的6379端口Redis服务，避免启动新的Redis容器
 - ✅ **外部访问**: 通过nginx反向代理将服务映射到www.joyogo.com的不同路径
-- ✅ **配置文件**: 创建了docker-compose.mo-db.yml配置文件，适配现有数据库
+- ✅ **配置文件**: 
+   - 创建了docker-compose.mo-db.yml配置文件，适配现有数据库
+   - 创建了docker-compose.with-existing-redis.yml配置文件，适配现有数据库和Redis
 - ✅ **数据库初始化**: 创建了init-mo-db.sh脚本，用于创建mo数据库和表结构
-- ✅ **启动脚本**: 创建了start-promotionai-with-existing-db.sh启动脚本，适配现有数据库环境
+- ✅ **启动脚本**: 
+   - 创建了start-promotionai-with-existing-db.sh启动脚本，适配现有数据库环境
+   - 创建了start-promotionai-with-existing-services.sh启动脚本，适配现有数据库和Redis环境
 
 ## 📊 技术规格
 
