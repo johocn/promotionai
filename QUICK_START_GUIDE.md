@@ -17,9 +17,21 @@
 
 ## 启动步骤
 
-### 1. 初始化数据库
+### 1. 确认现有服务
 
-首先，使用现有数据库创建新的"mo"数据库：
+首先，确认现有的数据库和Redis服务正在运行：
+
+```bash
+# 检查PostgreSQL是否运行
+psql -h localhost -p 5432 -U postgres -c "SELECT version();" 
+
+# 检查Redis是否运行
+redis-cli -h localhost -p 6379 ping
+```
+
+### 2. 初始化数据库
+
+如果"mo"数据库不存在，使用现有数据库创建新的"mo"数据库：
 
 ```bash
 # 确保脚本有执行权限
@@ -29,7 +41,7 @@ chmod +x init-mo-db.sh
 ./init-mo-db.sh
 ```
 
-### 2. 配置nginx反向代理
+### 3. 配置nginx反向代理
 
 将nginx配置应用到您的nginx服务器：
 
@@ -47,19 +59,19 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 3. 启动PromotionAI服务
+### 4. 启动PromotionAI服务
 
-运行启动脚本来启动所有服务：
+运行启动脚本来启动所有服务，连接到现有的数据库和Redis：
 
 ```bash
 # 确保脚本有执行权限
-chmod +x start-promotionai-with-existing-db.sh
+chmod +x start-promotionai-with-existing-services.sh
 
 # 启动服务
-./start-promotionai-with-existing-db.sh
+./start-promotionai-with-existing-services.sh
 ```
 
-### 3. 验证服务状态
+### 5. 验证服务状态
 
 检查所有服务是否正常运行：
 
@@ -105,12 +117,24 @@ docker rm $(docker ps -aq --filter name=promotionai)
 ## 故障排除
 
 ### 端口被占用
-如果遇到端口被占用的错误，请确保没有其他服务占用3010-3015、5435、6381端口。
+如果遇到端口被占用的错误，请确保没有其他服务占用3010-3015端口。
 
 ### 服务无法启动
 检查Docker是否正常运行：
 ```bash
 sudo systemctl status docker
+```
+
+### 数据库连接失败
+确认PostgreSQL服务运行在localhost:5432端口：
+```bash
+psql -h localhost -p 5432 -U postgres -c "SELECT version();"
+```
+
+### Redis连接失败
+确认Redis服务运行在localhost:6379端口：
+```bash
+redis-cli -h localhost -p 6379 ping
 ```
 
 ### nginx配置错误
@@ -122,7 +146,8 @@ sudo nginx -t
 ## 环境要求
 
 - Docker
-- Docker Compose
+- PostgreSQL (运行在5432端口)
+- Redis (运行在6379端口)
 - nginx
 - 服务器上配置了www.joyogo.com域名
 
