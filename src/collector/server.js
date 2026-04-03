@@ -1,4 +1,21 @@
 // src/collector/server.js
+// ========== 全局修复 undici webidl File 不存在问题 ==========
+if (typeof File === 'undefined') {
+ const { File: UndiciFile } = require('undici');
+ global.File = UndiciFile;
+}
+
+if (typeof Blob === 'undefined') {
+ const { Blob: UndiciBlob } = require('undici');
+ global.Blob = UndiciBlob;
+}
+
+if (typeof FormData === 'undefined') {
+ const { FormData: UndiciFormData } = require('undici');
+ global.FormData = UndiciFormData;
+}
+// ==========================================================
+
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');

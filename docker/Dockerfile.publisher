@@ -3,19 +3,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# 复制package文件
-COPY package*.json ./
-
-# 安装依赖
-RUN npm ci --only=production
-
 # 复制应用代码
 COPY src/publisher/ ./src/publisher/
 COPY config/ ./config/
+
+# 安装publisher依赖
+RUN cd src/publisher && npm install --production
 
 # 创建日志目录
 RUN mkdir -p logs
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "cd src/publisher && npm start"]

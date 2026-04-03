@@ -3,19 +3,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# 复制package文件
-COPY package*.json ./
-
-# 安装依赖
-RUN npm ci --only=production
-
 # 复制应用代码
 COPY src/ai-processor/ ./src/ai-processor/
 COPY config/ ./config/
+
+# 安装ai-processor依赖
+RUN cd src/ai-processor && npm install --production
 
 # 创建日志目录
 RUN mkdir -p logs
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "cd src/ai-processor && npm start"]

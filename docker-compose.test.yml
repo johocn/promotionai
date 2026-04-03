@@ -1,0 +1,234 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库 (测试环境)
+  postgres-test:
+    image: postgres:15
+    container_name: promotionai-postgres-test
+    environment:
+      POSTGRES_DB: ${DB_NAME:-promotionai_test}
+      POSTGRES_USER: ${DB_USER:-test_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-test_password}
+    ports:
+      - "5433:5432"  # 使用不同端口避免冲突
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - promotionai-test-network
+    restart: always
+    command: >
+      docker-entrypoint.sh
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c work_mem=2MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=50
+
+  # Redis缓存 (测试环境)
+  redis-test:
+    image: redis:7-alpine
+    container_name: promotionai-redis-test
+    ports:
+      - "6380:6379"  # 使用不同端口避免冲突
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - promotionai-test-network
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  # API网关服务 (测试环境)
+  api-gateway-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api-gateway
+    container_name: promotionai-api-gateway-test
+    ports:
+      - "4105:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_test}
+      - DB_USER=${DB_USER:-test_user}
+      - DB_PASSWORD=${DB_PASSWORD:-test_password}
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - COLLECTOR_PORT=3001
+      - AI_PROCESSOR_PORT=3002
+      - PUBLISHER_PORT=3003
+      - TRACKER_PORT=3004
+      - JWT_SECRET=${JWT_SECRET:-test_jwt_secret_for_test_env}
+      - API_RATE_LIMIT=${API_RATE_LIMIT:-200}
+      - API_RATE_WINDOW_MS=${API_RATE_WINDOW_MS:-900000}
+    depends_on:
+      - postgres-test
+      - redis-test
+    # 注释掉本地代码挂载，使用构建的镜像中的依赖
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    networks:
+      - promotionai-test-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 资讯采集服务 (测试环境)
+  collector-test:
+    image: collector-service:v3
+    container_name: promotionai-collector-test
+    ports:
+      - "4101:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - COLLECTOR_PORT=3001
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_test}
+      - DB_USER=${DB_USER:-test_user}
+      - DB_PASSWORD=${DB_PASSWORD:-test_password}
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - COLLECTOR_INTERVAL_MINUTES=${COLLECTOR_INTERVAL_MINUTES:-60}  # 测试环境延长采集间隔
+    depends_on:
+      - postgres-test
+      - redis-test
+    # 在测试环境中不挂载本地代码，使用构建的镜像中的依赖
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    networks:
+      - promotionai-test-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # AI处理服务 (测试环境)
+  ai-processor-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ai-processor
+    container_name: promotionai-ai-processor-test
+    ports:
+      - "4102:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - AI_PROCESSOR_PORT=3002
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_test}
+      - DB_USER=${DB_USER:-test_user}
+      - DB_PASSWORD=${DB_PASSWORD:-test_password}
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-3.5-turbo}  # 测试环境使用较便宜的模型
+      - AI_TEMPERATURE=${AI_TEMPERATURE:-0.7}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS:-1000}  # 测试环境减少token使用
+    depends_on:
+      - postgres-test
+      - redis-test
+    # 在测试环境中不挂载本地代码，使用构建的镜像中的依赖
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    networks:
+      - promotionai-test-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 内容分发服务 (测试环境)
+  publisher-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.publisher
+    container_name: promotionai-publisher-test
+    ports:
+      - "4103:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - PUBLISHER_PORT=3003
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_test}
+      - DB_USER=${DB_USER:-test_user}
+      - DB_PASSWORD=${DB_PASSWORD:-test_password}
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - PUBLISH_DELAY_SECONDS=${PUBLISH_DELAY_SECONDS:-10}  # 测试环境延长发布延迟
+      - MAX_PUBLISH_RETRIES=${MAX_PUBLISH_RETRIES:-2}  # 测试环境减少重试次数
+    depends_on:
+      - postgres-test
+      - redis-test
+    # 在测试环境中不挂载本地代码，使用构建的镜像中的依赖
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    networks:
+      - promotionai-test-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 追踪服务 (测试环境)
+  tracker-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.tracker
+    container_name: promotionai-tracker-test
+    ports:
+      - "4104:3000"
+    environment:
+      - NODE_ENV=test
+      - PORT=3000
+      - TRACKER_PORT=3004
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-promotionai_test}
+      - DB_USER=${DB_USER:-test_user}
+      - DB_PASSWORD=${DB_PASSWORD:-test_password}
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - TRACKING_DOMAIN=${TRACKING_DOMAIN:-localhost:3004}
+    depends_on:
+      - postgres-test
+      - redis-test
+    # 在测试环境中不挂载本地代码，使用构建的镜像中的依赖
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    networks:
+      - promotionai-test-network
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+
+networks:
+  promotionai-test-network:
+    driver: bridge

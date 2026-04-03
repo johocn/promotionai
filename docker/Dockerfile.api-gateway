@@ -3,11 +3,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# 复制package文件
-COPY package*.json ./
+# 复制api-gateway的package文件
+COPY src/api-gateway/package.json ./src/api-gateway/package.json
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装api-gateway依赖
+RUN cd src/api-gateway && npm install --production
 
 # 复制应用代码
 COPY src/api-gateway/ ./src/api-gateway/
@@ -18,4 +18,4 @@ RUN mkdir -p logs
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "cd src/api-gateway && npm start"]
