@@ -1,0 +1,1 @@
+import{B as o,H as t,L as n,M as r,ag as s}from"./vue-core-BqmH2-NT.js";const a={class:"collector-page"},l=o({__name:"index",setup(c){return(_,p)=>{const e=s("router-view");return t(),n("div",a,[r(e)])}}});export{l as default};
