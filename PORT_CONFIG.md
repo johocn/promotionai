@@ -19,7 +19,7 @@
 ```bash
 # 应用配置
 NODE_ENV=production
-PORT=3000
+PORT=3030
 
 # 数据库配置
 DB_HOST=localhost
@@ -33,10 +33,10 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # 服务端口配置
-COLLECTOR_PORT=3001
-AI_PROCESSOR_PORT=3002
-PUBLISHER_PORT=3003
-TRACKER_PORT=3004
+COLLECTOR_PORT=3031
+AI_PROCESSOR_PORT=3032
+PUBLISHER_PORT=3033
+TRACKER_PORT=3034
 ```
 
 ### 2. Docker Compose 端口映射
@@ -45,23 +45,23 @@ TRACKER_PORT=3004
 services:
   api-gateway:
     ports:
-      - "3030:3030"  # 外部:内部
+      - "3030:3000"  # 外部 3030 → 容器内 3000
   
   collector:
     ports:
-      - "3031:3031"  # 外部 3001 → 容器内 3000
+      - "3031:3000"  # 外部 3031 → 容器内 3000
   
   ai-processor:
     ports:
-      - "3032:3032"
+      - "3032:3000"  # 外部 3032 → 容器内 3000
   
   publisher:
     ports:
-      - "3033:3033"
+      - "3033:3000"  # 外部 3033 → 容器内 3000
   
   tracker:
     ports:
-      - "3034:3034"
+      - "3034:3000"  # 外部 3034 → 容器内 3000
 ```
 
 ---
@@ -100,7 +100,7 @@ const proxyConfig = {
 
 ## 📡 各服务详细配置
 
-### 1️⃣ API 网关 (3000)
+### 1️⃣ API 网关 (3030)
 
 **文件**: `src/api-gateway/server.js`
 
@@ -127,7 +127,7 @@ GET  /api/auth/profile    # 获取用户信息
 
 ---
 
-### 2️⃣ 资讯采集服务 (3001)
+### 2️⃣ 资讯采集服务 (3031)
 
 **文件**: `src/collector/server.js`
 
@@ -154,7 +154,7 @@ POST /news/:id/process    # 发送到 AI 处理
 
 ---
 
-### 3️⃣ AI 处理服务 (3002)
+### 3️⃣ AI 处理服务 (3032)
 
 **文件**: `src/ai-processor/server.js`
 
@@ -177,7 +177,7 @@ GET  /platforms           # 获取目标平台配置
 
 ---
 
-### 4️⃣ 渠道分发服务 (3003)
+### 4️⃣ 渠道分发服务 (3033)
 
 **文件**: `src/publisher/server.js`
 
@@ -201,7 +201,7 @@ POST /schedule            # 创建发布计划
 
 ---
 
-### 5️⃣ 埋点追踪服务 (3004)
+### 5️⃣ 埋点追踪服务 (3034)
 
 **文件**: `src/tracker/server.js`
 
@@ -247,7 +247,7 @@ VITE_REQUEST_TIMEOUT=30000
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3030/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -319,17 +319,17 @@ docker-compose logs -f collector
 
 ```bash
 # 检查端口占用
-netstat -tlnp | grep -E '3000|3001|3002|3003|3004'
+netstat -tlnp | grep -E '3030|3031|3032|3033|3034'
 
 # 或使用 ss 命令
-ss -tlnp | grep -E '3000|3001|3002|3003|3004'
+ss -tlnp | grep -E '3030|3031|3032|3033|3034'
 
 # 测试服务连通性
-curl http://localhost:3000/health
-curl http://localhost:3001/health
-curl http://localhost:3002/health
-curl http://localhost:3003/health
-curl http://localhost:3004/health
+curl http://localhost:3030/health
+curl http://localhost:3031/health
+curl http://localhost:3032/health
+curl http://localhost:3033/health
+curl http://localhost:3034/health
 ```
 
 ---
@@ -389,8 +389,8 @@ app.use('/api/', limiter);
 ### 监控端点
 
 ```
-GET http://localhost:3000/metrics    # Prometheus 指标
-GET http://localhost:3000/health     # 健康检查
+GET http://localhost:3030/metrics    # Prometheus 指标
+GET http://localhost:3030/health     # 健康检查
 ```
 
 ---
@@ -401,14 +401,14 @@ GET http://localhost:3000/health     # 健康检查
 
 ```bash
 # 查找占用端口的进程
-lsof -i :3000
-lsof -i :3001
+lsof -i :3030
+lsof -i :3031
 
 # 杀死进程
 kill -9 <PID>
 
 # 或修改端口配置
-export PORT=3010
+export PORT=3040
 ```
 
 ### 服务无法启动
@@ -431,4 +431,4 @@ tail -f logs/api-gateway-error.log
 ---
 
 **最后更新**: 2026-04-13  
-**版本**: v1.0
+**版本**: v1.1

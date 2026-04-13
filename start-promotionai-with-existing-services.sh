@@ -1,8 +1,8 @@
 #!/bin/bash
 # start-promotionai-with-existing-services.sh
-# 使用现有数据库和Redis服务启动PromotionAI服务
+# 使用现有数据库和 Redis 服务启动 PromotionAI 服务
 
-echo "🚀 启动 PromotionAI 服务 (使用现有数据库和Redis)..."
+echo "🚀 启动 PromotionAI 服务 (使用现有数据库和 Redis)..."
 echo ""
 
 # 检查必要的工具
@@ -33,17 +33,17 @@ fi
 
 echo "✅ 成功连接到现有数据库"
 
-# 检查现有Redis连接
-echo "🔗 检查现有Redis连接..."
+# 检查现有 Redis 连接
+echo "🔗 检查现有 Redis 连接..."
 if ! redis-cli -h localhost -p 6379 ping > /dev/null 2>&1; then
-    echo "❌ 无法连接到现有Redis服务 (localhost:6379)"
+    echo "❌ 无法连接到现有 Redis 服务 (localhost:6379)"
     echo "💡 请确保 Redis 服务正在运行"
     exit 1
 fi
 
-echo "✅ 成功连接到现有Redis服务"
+echo "✅ 成功连接到现有 Redis 服务"
 
-# 检查mo数据库是否存在
+# 检查 mo 数据库是否存在
 echo "🔍 检查 mo 数据库是否存在..."
 DB_EXISTS=$(PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h localhost -p 5432 -U "${DB_USER:-postgres}" -d postgres -t -c "SELECT 1 FROM pg_database WHERE datname = 'mo';" | tr -d ' \t\n\r')
 
@@ -54,7 +54,7 @@ else
     echo "✅ mo 数据库已存在"
 fi
 
-# 检查mo_user是否存在
+# 检查 mo_user 是否存在
 echo "🔍 检查 mo_user 用户..."
 USER_EXISTS=$(PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h localhost -p 5432 -U "${DB_USER:-postgres}" -d postgres -t -c "SELECT 1 FROM pg_user WHERE usename = 'mo_user';" | tr -d ' \t\n\r')
 
@@ -79,7 +79,7 @@ export NODE_ENV=production
 
 echo "🔧 环境变量配置完成"
 
-# 检查端口可用性（只需要检查应用端口，不需要检查数据库和Redis端口）
+# 检查端口可用性（只需要检查应用端口，不需要检查数据库和 Redis 端口）
 check_port() {
     local port=$1
     if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
@@ -92,7 +92,7 @@ check_port() {
 }
 
 echo "🔍 检查应用端口可用性..."
-REQUIRED_PORTS=(3010 3011 3012 3013 3014 3015)
+REQUIRED_PORTS=(3030 3031 3032 3033 3034)
 ALL_AVAILABLE=true
 
 for port in "${REQUIRED_PORTS[@]}"; do
@@ -109,11 +109,11 @@ fi
 
 echo "✅ 所需端口均可用，开始启动服务..."
 
-# 不再启动Redis容器，直接使用现有Redis服务
-echo "💡 使用现有Redis服务 (localhost:6379)，跳过Redis容器启动"
+# 不再启动 Redis 容器，直接使用现有 Redis 服务
+echo "💡 使用现有 Redis 服务 (localhost:6379)，跳过 Redis 容器启动"
 
-# 使用Docker Compose启动服务（不包含Redis）
-echo "🐳 使用Docker Compose启动服务（使用现有数据库和Redis）..."
+# 使用 Docker Compose 启动服务（不包含 Redis）
+echo "🐳 使用 Docker Compose 启动服务（使用现有数据库和 Redis）..."
 docker compose -f docker-compose.with-existing-redis.yml up -d
 
 # 等待服务启动
@@ -129,15 +129,13 @@ docker compose -f docker-compose.with-existing-redis.yml ps
 
 echo ""
 echo "🌐 访问地址："
-echo "   API网关 (moapi): http://www.joyogo.com/moapi -> http://localhost:3010"
-echo "   健康检查 (mojk): http://www.joyogo.com/mojk -> http://localhost:3015"
-echo "   资讯采集 (mozx): http://www.joyogo.com/mozx -> http://localhost:3011"
-echo "   AI处理 (moai): http://www.joyogo.com/moai -> http://localhost:3012"
-echo "   内容分发 (monr): http://www.joyogo.com/monr -> http://localhost:3013"
-echo "   追踪服务 (mozz): http://www.joyogo.com/mozz -> http://localhost:3014"
+echo "   API 网关：http://localhost:3030"
+echo "   资讯采集：http://localhost:3031"
+echo "   AI 处理：http://localhost:3032"
+echo "   渠道分发：http://localhost:3033"
+echo "   埋点追踪：http://localhost:3034"
 
 echo ""
-echo "💡 提示：请确保nginx配置已更新以将路径映射到相应的本地端口"
 echo "🔧 如需停止服务：docker compose -f docker-compose.with-existing-redis.yml down"
 echo ""
-echo "📊 服务使用现有数据库 (localhost:5432) 和现有Redis (localhost:6379)"
+echo "📊 服务使用现有数据库 (localhost:5432) 和现有 Redis (localhost:6379)"

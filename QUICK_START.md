@@ -2,66 +2,56 @@
 
 ## 概述
 
-本指南将帮助您快速启动PromotionAI服务，服务将通过www.joyogo.com域名的不同路径访问。
+本指南将帮助您快速启动 PromotionAI 服务，服务端口配置为 3030-3034。
 
-## 服务映射
+## 服务端口映射
 
-通过www.joyogo.com域名访问的服务：
-
-- **API网关**: `www.joyogo.com/moapi` → 内部端口 `3010`
-- **健康检查**: `www.joyogo.com/mojk` → 内部端口 `3015`
-- **资讯采集**: `www.joyogo.com/mozx` → 内部端口 `3011`
-- **AI处理**: `www.joyogo.com/moai` → 内部端口 `3012`
-- **内容分发**: `www.joyogo.com/monr` → 内部端口 `3013`
-- **追踪服务**: `www.joyogo.com/mozz` → 内部端口 `3014`
+| 服务名称 | 端口 | API 前缀 | 说明 |
+|---------|------|---------|------|
+| **API 网关** | 3030 | `/api` | 统一入口、认证、路由 |
+| **资讯采集** | 3031 | `/collector` | 资讯爬虫、RSS 订阅 |
+| **AI 处理** | 3032 | `/ai-processor` | 内容生成、质量评估 |
+| **渠道分发** | 3033 | `/publisher` | 多渠道发布 |
+| **埋点追踪** | 3034 | `/tracker` | 链接生成、数据分析 |
 
 ## 启动步骤
 
 ### 1. 确认现有服务
 
-首先，确认现有的数据库和Redis服务正在运行：
+首先，确认现有的数据库和 Redis 服务正在运行：
 
 ```bash
-# 检查PostgreSQL是否运行
+# 检查 PostgreSQL 是否运行
 psql -h localhost -p 5432 -U postgres -c "SELECT version();" 
 
-# 检查Redis是否运行
+# 检查 Redis 是否运行
 redis-cli -h localhost -p 6379 ping
 ```
 
 ### 2. 初始化数据库
 
-如果"mo"数据库不存在，使用现有数据库创建新的"mo"数据库：
+如果数据库不存在，使用现有数据库创建：
 
 ```bash
 # 确保脚本有执行权限
 chmod +x init-mo-db.sh
 
-# 初始化mo数据库
+# 初始化数据库
 ./init-mo-db.sh
 ```
 
-### 3. 配置nginx反向代理
+### 3. 配置环境变量
 
-将nginx配置应用到您的nginx服务器：
+复制并配置环境变量文件：
 
 ```bash
-# 复nginx配置到nginx目录
-sudo cp nginx-config.conf /etc/nginx/sites-available/promotionai.conf
-
-# 创建软链接启用站点
-sudo ln -s /etc/nginx/sites-available/promotionai.conf /etc/nginx/sites-enabled/
-
-# 测试nginx配置
-sudo nginx -t
-
-# 重启nginx
-sudo systemctl reload nginx
+cp .env.example .env
+# 编辑 .env 文件，配置数据库和 AI API 密钥
 ```
 
-### 4. 启动PromotionAI服务
+### 4. 启动 PromotionAI 服务
 
-运行启动脚本来启动所有服务，连接到现有的数据库和Redis：
+运行启动脚本来启动所有服务：
 
 ```bash
 # 确保脚本有执行权限
@@ -76,7 +66,7 @@ chmod +x start-promotionai-with-existing-services.sh
 检查所有服务是否正常运行：
 
 ```bash
-# 查看Docker容器状态
+# 查看 Docker 容器状态
 docker ps --filter name=promotionai
 
 # 检查特定服务日志
@@ -85,21 +75,27 @@ docker logs promotionai-api-gateway
 
 ## 访问服务
 
-启动完成后，您可以通过以下URL访问服务：
+启动完成后，您可以通过以下 URL 访问服务：
 
-1. **API网关**: http://www.joyogo.com/moapi
-2. **健康检查**: http://www.joyogo.com/mojk
-3. **资讯采集**: http://www.joyogo.com/mozx
-4. **AI处理**: http://www.joyogo.com/moai
-5. **内容分发**: http://www.joyogo.com/monr
-6. **追踪服务**: http://www.joyogo.com/mozz
+1. **API 网关**: http://localhost:3030
+2. **资讯采集**: http://localhost:3031
+3. **AI 处理**: http://localhost:3032
+4. **渠道分发**: http://localhost:3033
+5. **埋点追踪**: http://localhost:3034
 
 ## 健康检查
 
-要验证所有服务是否正常运行，可以访问健康检查端点：
+要验证所有服务是否正常运行：
 
 ```bash
-curl http://www.joyogo.com/mojk
+# 检查 API 网关健康状态
+curl http://localhost:3030/health
+
+# 检查各服务健康状态
+curl http://localhost:3031/health
+curl http://localhost:3032/health
+curl http://localhost:3033/health
+curl http://localhost:3034/health
 ```
 
 ## 停止服务
@@ -107,50 +103,59 @@ curl http://www.joyogo.com/mojk
 如需停止所有服务：
 
 ```bash
-# 偂止所有PromotionAI相关容器
+# 停止所有 PromotionAI 相关容器
 docker stop $(docker ps -q --filter name=promotionai)
 
 # 或者删除容器
 docker rm $(docker ps -aq --filter name=promotionai)
+
+# 或使用 Docker Compose
+docker compose -f docker-compose.with-existing-redis.yml down
 ```
 
 ## 故障排除
 
 ### 端口被占用
-如果遇到端口被占用的错误，请确保没有其他服务占用3010-3015端口。
+如果遇到端口被占用的错误，请确保没有其他服务占用 3030-3034 端口：
+
+```bash
+# 检查端口占用
+lsof -i :3030
+lsof -i :3031
+lsof -i :3032
+lsof -i :3033
+lsof -i :3034
+```
 
 ### 服务无法启动
-检查Docker是否正常运行：
+检查 Docker 是否正常运行：
 ```bash
 sudo systemctl status docker
 ```
 
 ### 数据库连接失败
-确认PostgreSQL服务运行在localhost:5432端口：
+确认 PostgreSQL 服务运行在 localhost:5432 端口：
 ```bash
 psql -h localhost -p 5432 -U postgres -c "SELECT version();"
 ```
 
-### Redis连接失败
-确认Redis服务运行在localhost:6379端口：
+### Redis 连接失败
+确认 Redis 服务运行在 localhost:6379 端口：
 ```bash
 redis-cli -h localhost -p 6379 ping
-```
-
-### nginx配置错误
-检查nginx配置语法：
-```bash
-sudo nginx -t
 ```
 
 ## 环境要求
 
 - Docker
-- PostgreSQL (运行在5432端口)
-- Redis (运行在6379端口)
-- nginx
-- 服务器上配置了www.joyogo.com域名
+- Docker Compose
+- PostgreSQL (运行在 5432 端口)
+- Redis (运行在 6379 端口)
+- Node.js 18+
 
 ## 支持
 
-如需进一步支持，请参考SERVICE_CONFIG.md文档或联系开发团队。
+如需进一步支持，请参考：
+- [PORT_CONFIG.md](PORT_CONFIG.md) - 端口配置详情
+- [SERVICE_CONFIG.md](SERVICE_CONFIG.md) - 服务配置
+- [DEPLOYMENT.md](DEPLOYMENT.md) - 部署指南

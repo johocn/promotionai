@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  # API网关服务 (端口 3010)
+  # API 网关服务 (端口 3030)
   api-gateway:
     build:
       context: .
       dockerfile: docker/Dockerfile.api-gateway
     container_name: promotionai-api-gateway
     ports:
-      - "3010:3000"
+      - "3030:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -17,14 +17,14 @@ services:
       - DB_NAME=mo  # 使用新的数据库名
       - DB_USER=${DB_USER:-mo_user}
       - DB_PASSWORD=${DB_PASSWORD:-mo_password}
-      - REDIS_HOST=host.docker.internal  # 使用主机上的现有Redis
-      - REDIS_PORT=6379  # 使用现有的Redis端口
+      - REDIS_HOST=host.docker.internal  # 使用主机上的现有 Redis
+      - REDIS_PORT=6379  # 使用现有的 Redis 端口
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - COLLECTOR_PORT=3011
-      - AI_PROCESSOR_PORT=3012
-      - PUBLISHER_PORT=3013
-      - TRACKER_PORT=3014
-      - HEALTH_CHECK_PORT=3015
+      - COLLECTOR_PORT=3031
+      - AI_PROCESSOR_PORT=3032
+      - PUBLISHER_PORT=3033
+      - TRACKER_PORT=3034
+      - HEALTH_CHECK_PORT=3035
       - JWT_SECRET=${JWT_SECRET:-production_jwt_secret}
       - API_RATE_LIMIT=${API_RATE_LIMIT:-100}
       - API_RATE_WINDOW_MS=${API_RATE_WINDOW_MS:-900000}
@@ -40,18 +40,18 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # 资讯采集服务 (端口 3011)
+  # 资讯采集服务 (端口 3031)
   collector:
     build:
       context: .
       dockerfile: docker/Dockerfile.collector
     container_name: promotionai-collector
     ports:
-      - "3011:3000"
+      - "3031:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - COLLECTOR_PORT=3011
+      - COLLECTOR_PORT=3031
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
       - DB_NAME=mo
@@ -73,18 +73,18 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # AI处理服务 (端口 3012)
+  # AI 处理服务 (端口 3032)
   ai-processor:
     build:
       context: .
       dockerfile: docker/Dockerfile.ai-processor
     container_name: promotionai-ai-processor
     ports:
-      - "3012:3000"
+      - "3032:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - AI_PROCESSOR_PORT=3012
+      - AI_PROCESSOR_PORT=3032
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
       - DB_NAME=mo
@@ -109,18 +109,18 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # 内容分发服务 (端口 3013)
+  # 渠道分发服务 (端口 3033)
   publisher:
     build:
       context: .
       dockerfile: docker/Dockerfile.publisher
     container_name: promotionai-publisher
     ports:
-      - "3013:3000"
+      - "3033:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - PUBLISHER_PORT=3013
+      - PUBLISHER_PORT=3033
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
       - DB_NAME=mo
@@ -143,18 +143,18 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # 追踪服务 (端口 3014)
+  # 埋点追踪服务 (端口 3034)
   tracker:
     build:
       context: .
       dockerfile: docker/Dockerfile.tracker
     container_name: promotionai-tracker
     ports:
-      - "3014:3000"
+      - "3034:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - TRACKER_PORT=3014
+      - TRACKER_PORT=3034
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
       - DB_NAME=mo
@@ -163,7 +163,7 @@ services:
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - TRACKING_DOMAIN=${TRACKING_DOMAIN:-localhost:3014}
+      - TRACKING_DOMAIN=${TRACKING_DOMAIN:-localhost:3034}
     volumes:
       - .:/app
       - /app/node_modules
