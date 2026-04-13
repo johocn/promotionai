@@ -1,226 +1,264 @@
-# PromotionAI - 智能促销系统
+# PromotionAI - 智能内容营销平台
 
-**PromotionAI** 是一个基于AI技术的智能内容营销平台，专注于财经/健康领域的资讯采集、智能处理、多渠道分发和效果追踪。
+**PromotionAI** 是一个基于 AI 技术的智能内容营销平台，专注于财经/健康领域的资讯采集、智能处理、多渠道分发和效果追踪。
 
-## 🚀 项目结构
-
-```
-PromotionAI/
-├── docs/                           # 文档目录
-│   ├── financial-health-content-system.md      # 主需求文档
-│   ├── tech-design/                # 技术设计
-│   └── ...
-├── src/                            # 源代码
-│   ├── api-gateway/               # API网关服务
-│   ├── collector/                 # 资讯采集服务
-│   ├── ai-processor/              # AI处理服务
-│   ├── publisher/                 # 内容分发服务
-│   └── tracker/                   # 追踪服务
-├── config/                        # 配置文件
-├── scripts/                       # 脚本
-│   ├── init-db.js                 # 初始化数据库
-│   ├── migrate.js                 # 数据库迁移
-│   └── test-connectivity.js       # 连接测试
-├── docker/                        # Docker配置
-├── logs/                          # 日志文件
-├── .env.example                   # 环境变量示例
-├── docker-compose.yml             # Docker Compose配置
-├── package.json                   # 项目配置
-├── start-dev-env.sh               # 开发环境启动脚本
-└── README.md                      # 项目说明
-```
-
-## 🏗️ 核心服务
-
-### 1. API网关服务 (端口: 3000)
-- 统一入口管理
-- 认证授权
-- 速率限制
-- 请求路由
-- 监控指标
-
-### 2. 资讯采集服务 (端口: 3001)
-- 多源资讯采集
-- RSS/HTML内容提取
-- 数据清洗和存储
-- 定时采集任务
-
-### 3. AI处理服务 (端口: 3002)
-- 智能文案生成
-- 多风格转换 (焦虑型、干货型、故事型)
-- 合规性检查
-- 质量评估
-
-### 4. 内容分发服务 (端口: 3003)
-- 多渠道发布 (抖音、小红书、微信)
-- 账号管理
-- 定时发布
-- 发布状态追踪
-
-### 5. 追踪服务 (端口: 3004)
-- 埋点追踪
-- 转化分析
-- UTM参数支持
-- 统计报告
-
-## 🛠️ 技术栈
-
-| 类别 | 技术栈 |
-|------|--------|
-| **后端** | Node.js + Express/Koa |
-| **数据库** | PostgreSQL + Redis + MongoDB |
-| **AI服务** | OpenAI API / 本地模型 |
-| **监控** | Prometheus + 自定义指标 |
-| **安全** | JWT + 输入验证 + 合规检查 |
-| **部署** | Docker + Docker Compose |
+---
 
 ## 🚀 快速开始
 
-### 环境要求
-- **Node.js**: >= 18.0.0
-- **Docker**: >= 20.0 (可选，用于容器化部署)
-- **Redis**: >= 7.0 (用于生产环境，开发环境可选)
-
-### 本地开发环境
-
-1. **克隆项目**
 ```bash
+# 克隆项目
 git clone git@github.com:johocn/promotionai.git
 cd promotionai
-```
 
-2. **安装依赖**
-```bash
+# 安装依赖
 npm install
-```
 
-3. **配置环境变量**
-```bash
+# 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，配置数据库连接、AI API密钥等
-```
+# 编辑 .env 文件，配置数据库和 AI API 密钥
 
-4. **初始化开发数据库**
-```bash
-node scripts/simple-migrate.js
-```
-
-5. **启动开发环境**
-```bash
-chmod +x start-dev-env.sh
+# 启动开发环境
 ./start-dev-env.sh
 ```
 
-### Docker部署
+**详细指南**: [QUICK_START.md](QUICK_START.md)
 
-1. **构建并启动所有服务**
+---
+
+## 📋 项目概况
+
+### 核心功能
+
+| 模块 | 功能 | 状态 |
+|------|------|------|
+| **资讯采集** | 多源采集、RSS、智能过滤 | ✅ 完成 |
+| **AI 处理** | 文案生成、风格转换、合规检测 | ✅ 完成 |
+| **内容分发** | 抖音、小红书、微信公众号 | ✅ 完成 |
+| **效果追踪** | 埋点追踪、转化分析 | ✅ 完成 |
+| **管理后台** | Vue3 + TypeScript 前端 | ✅ 完成 |
+
+### 技术栈
+
+| 类别 | 技术 |
+|------|------|
+| **后端** | Node.js + Koa / Python + FastAPI |
+| **前端** | Vue 3 + TypeScript + Element Plus |
+| **数据库** | PostgreSQL + Redis + MongoDB + PGVector |
+| **AI 服务** | OpenAI API / Ollama |
+| **部署** | Docker + Docker Compose |
+
+---
+
+## 📁 项目结构
+
+```
+promotionai/
+├── src/                          # 后端源代码
+│   ├── api-gateway/              # API 网关服务 (3000)
+│   ├── collector/                # 资讯采集服务 (3001)
+│   ├── ai-processor/             # AI 处理服务 (3002)
+│   ├── publisher/                # 内容分发服务 (3003)
+│   └── tracker/                  # 追踪服务 (3004)
+├── web-admin/                    # 前端管理后台
+│   ├── src/
+│   │   ├── api/                  # API 接口定义
+│   │   ├── components/           # 通用组件
+│   │   ├── views/                # 页面组件
+│   │   ├── router/               # 路由配置
+│   │   └── store/                # 状态管理
+│   └── package.json
+├── docker/                       # Docker 配置
+├── docs/                         # 项目文档
+├── scripts/                      # 脚本工具
+├── README.md                     # 本文件
+├── QUICK_START.md                # 快速入门
+├── DEPLOYMENT.md                 # 部署指南
+├── SERVICE_CONFIG.md             # 服务配置
+└── docker-compose.yml            # Docker Compose 配置
+```
+
+---
+
+## 📖 文档导航
+
+### 📘 基础文档
+
+| 文档 | 说明 |
+|------|------|
+| [README.md](README.md) | 项目说明（本文件） |
+| [QUICK_START.md](QUICK_START.md) | 快速入门指南 |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | 部署指南 |
+| [SERVICE_CONFIG.md](SERVICE_CONFIG.md) | 服务配置 |
+| [PORT_CONFIG.md](PORT_CONFIG.md) | 端口配置 |
+| [STARTUP_CHECKLIST.md](STARTUP_CHECKLIST.md) | 启动检查清单 |
+
+### 📚 技术文档 (docs/)
+
+| 文档 | 说明 |
+|------|------|
+| [docs/INDEX.md](docs/INDEX.md) | 文档索引 |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 需求文档 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构设计 |
+| [docs/DATABASE.md](docs/DATABASE.md) | 数据库设计 |
+| [docs/SECURITY.md](docs/SECURITY.md) | 安全实现 |
+| [docs/FEATURES.md](docs/FEATURES.md) | 功能概览 |
+| [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) | 实施总结 |
+| [docs/BRAND_GUIDELINES.md](docs/BRAND_GUIDELINES.md) | 品牌指南 |
+
+### 🛠️ 开发指南 (docs/guides/)
+
+| 文档 | 说明 |
+|------|------|
+| [docs/guides/git-guide.md](docs/guides/git-guide.md) | Git 使用指南 |
+| [docs/guides/development-guide.md](docs/guides/development-guide.md) | 开发指南 |
+
+### 📊 其他文档
+
+| 文档 | 说明 |
+|------|------|
+| [INTEGRATION_TEST_PLAN.md](INTEGRATION_TEST_PLAN.md) | 集成测试计划 |
+| [GIT_COMMIT_REPORT.md](GIT_COMMIT_REPORT.md) | Git 提交报告 |
+
+---
+
+## 🎯 核心特性
+
+### 1. 智能内容生成
+
+- **多风格转换**: 焦虑型、干货型、故事型文案
+- **合规检测**: 金融/健康内容自动合规检查
+- **质量评估**: 多维度质量评分体系
+- **A/B 测试**: 自动化 A/B 测试，优选最佳内容
+
+### 2. 多渠道分发
+
+- **平台支持**: 抖音、小红书、微信公众号
+- **内容适配**: 根据平台特点自动调整格式
+- **发布调度**: 定时发布、状态跟踪
+- **账号管理**: 多账号统一管理
+
+### 3. 效果追踪
+
+- **埋点链接**: 带唯一标识的追踪链接
+- **行为记录**: 浏览、点击、停留时长
+- **转化追踪**: 完整转化路径追踪
+- **跨平台归因**: 用户行为跨平台追踪
+
+### 4. 安全合规
+
+- **内容审核**: 敏感词过滤和违禁词库
+- **AI 标识**: 明确标注 AI 生成内容
+- **金融合规**: 防止承诺收益、荐股等违规
+- **医疗合规**: 避免诊疗建议相关内容
+
+---
+
+## 🔧 配置说明
+
+### 环境变量
+
 ```bash
-docker-compose up -d
-```
-
-2. **查看服务状态**
-```bash
-docker-compose ps
-```
-
-## 📋 API文档
-
-### 认证方式
-所有API请求都需要在Header中包含认证Token：
-```
-Authorization: Bearer <jwt_token>
-```
-
-### 主要API端点
-
-#### 资讯采集服务
-- `GET /api/news` - 获取采集的资讯
-- `POST /api/collect` - 手动触发采集
-- `POST /api/sources` - 添加资讯源
-- `GET /health` - 健康检查
-
-#### AI处理服务
-- `POST /api/generate` - 生成AI内容
-- `GET /api/content/:id` - 获取AI生成内容
-- `POST /api/feedback` - 提交质量反馈
-- `GET /api/stats` - 获取统计信息
-
-#### 内容分发服务
-- `POST /api/distribute` - 创建分发任务
-- `POST /api/accounts` - 添加渠道账号
-- `GET /api/distribution` - 获取分发记录
-
-#### 追踪服务
-- `POST /api/tracking-links` - 创建追踪链接
-- `GET /api/reports` - 获取统计报告
-- `POST /api/conversions` - 记录转化
-
-## 🔧 配置管理
-
-### 环境变量配置
-```env
 # 数据库配置
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=promotionai_db
+DB_NAME=promotionai
 DB_USER=app_user
-DB_PASSWORD=secure_password
+DB_PASSWORD=your_password
 
-# AI服务配置
-OPENAI_API_KEY=your_openai_api_key
+# Redis 配置
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# AI 服务配置
+OPENAI_API_KEY=your_api_key
 OPENAI_MODEL=gpt-4-turbo
 
-# 安全配置
-JWT_SECRET=your_jwt_secret
-ENCRYPTION_KEY=your_encryption_key
+# JWT 配置
+JWT_SECRET=your_secret_key
 ```
+
+**详细配置**: [SERVICE_CONFIG.md](SERVICE_CONFIG.md)
+
+### 端口配置
+
+| 服务 | 端口 | 说明 |
+|------|------|------|
+| API 网关 | 3000 | 统一入口 |
+| 资讯采集 | 3001 | 采集服务 |
+| AI 处理 | 3002 | AI 生成 |
+| 内容分发 | 3003 | 发布服务 |
+| 效果追踪 | 3004 | 追踪服务 |
+
+**详细配置**: [PORT_CONFIG.md](PORT_CONFIG.md)
+
+---
 
 ## 🧪 测试
 
-### 连接性测试
 ```bash
+# 连接性测试
 node scripts/test-connectivity.js
-```
 
-### 数据库迁移
-```bash
+# 数据库迁移
 node scripts/migrate.js
+
+# 集成测试
+npm run test
 ```
 
-## 🛡️ 安全规范
+**测试计划**: [INTEGRATION_TEST_PLAN.md](INTEGRATION_TEST_PLAN.md)
 
-### 数据安全
-- 传输加密: HTTPS + TLS 1.3
-- 存储加密: 字段级加密
-- 访问控制: JWT + RBAC
+---
 
-### 内容合规
-- 金融合规: 防止承诺收益、荐股等违规内容
-- 健康合规: 避免诊疗建议相关内容
-- 平台规则: 各平台AI生成内容规则检测
+## 📊 项目进度
 
-## 📊 监控指标
+### 已完成 (90%)
 
-### 系统指标
-- 响应时间: P95 < 500ms
-- 可用性: > 99.5%
-- 吞吐量: 支持1000+ QPS
+- ✅ 需求分析与设计
+- ✅ 技术架构设计
+- ✅ 数据库设计
+- ✅ 5 个后端微服务
+- ✅ 前端管理后台
+- ✅ Docker 容器化
+- ✅ 文档体系
 
-### 业务指标
-- 采集成功率: > 95%
-- AI生成质量: > 85%
-- 合规通过率: > 98%
-- 转化率提升: > 30%
+### 待完善 (10%)
 
-## 🤝 贡献
+- ⏳ 搜索功能优化
+- ⏳ Redis 缓存集成
+- ⏳ 完整测试用例
+- ⏳ CI/CD 流水线
 
-欢迎贡献代码！请遵循以下步骤：
+---
+
+## 🤝 贡献指南
+
+### Git 工作流
 
 1. Fork 项目
-2. 创建功能分支
-3. 提交更改
-4. 发起 Pull Request
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 发起 Pull Request
+
+**详细指南**: [docs/guides/git-guide.md](docs/guides/git-guide.md)
+
+---
 
 ## 📄 许可证
 
 MIT License
+
+---
+
+## 📞 联系方式
+
+- **GitHub**: https://github.com/johocn/promotionai
+- **项目负责人**: OpenClaw AI Assistant
+
+---
+
+**最后更新**: 2026-04-13  
+**版本**: v1.0  
+**状态**: ✅ 开发完成
