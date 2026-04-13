@@ -30,7 +30,7 @@ const logger = winston.createLogger({
 
 // 创建Express应用
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 
 // Prometheus监控指标
 const collectDefaultMetrics = client.collectDefaultMetrics;
@@ -56,7 +56,7 @@ app.use(helmet({
 
 // CORS配置
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3030', 'http://localhost:3031', 'http://localhost:3032', 'http://localhost:3033', 'http://localhost:3034'],
   credentials: true
 }));
 
@@ -148,10 +148,10 @@ app.get('/metrics', async (req, res) => {
 app.get('/health', async (req, res) => {
   // 检查下游服务健康状况
   const services = {
-    collector: await serviceHealthCheck('collector', `http://localhost:${process.env.COLLECTOR_PORT || 3001}`),
-    aiProcessor: await serviceHealthCheck('ai-processor', `http://localhost:${process.env.AI_PROCESSOR_PORT || 3002}`),
-    publisher: await serviceHealthCheck('publisher', `http://localhost:${process.env.PUBLISHER_PORT || 3003}`),
-    tracker: await serviceHealthCheck('tracker', `http://localhost:${process.env.TRACKER_PORT || 3004}`)
+    collector: await serviceHealthCheck('collector', `http://localhost:${process.env.COLLECTOR_PORT || 3031}`),
+    aiProcessor: await serviceHealthCheck('ai-processor', `http://localhost:${process.env.AI_PROCESSOR_PORT || 3032}`),
+    publisher: await serviceHealthCheck('publisher', `http://localhost:${process.env.PUBLISHER_PORT || 3033}`),
+    tracker: await serviceHealthCheck('tracker', `http://localhost:${process.env.TRACKER_PORT || 3034}`)
   };
 
   const overallStatus = Object.values(services).every(service => service);
@@ -202,10 +202,10 @@ const createServiceProxy = (targetPort, serviceName) => {
 
 // 创建服务代理
 const serviceProxies = {
-  collector: createServiceProxy(process.env.COLLECTOR_PORT || 3001, 'collector'),
-  aiProcessor: createServiceProxy(process.env.AI_PROCESSOR_PORT || 3002, 'ai'),
-  publisher: createServiceProxy(process.env.PUBLISHER_PORT || 3003, 'publisher'),
-  tracker: createServiceProxy(process.env.TRACKER_PORT || 3004, 'tracker')
+  collector: createServiceProxy(process.env.COLLECTOR_PORT || 3031, 'collector'),
+  aiProcessor: createServiceProxy(process.env.AI_PROCESSOR_PORT || 3032, 'ai'),
+  publisher: createServiceProxy(process.env.PUBLISHER_PORT || 3033, 'publisher'),
+  tracker: createServiceProxy(process.env.TRACKER_PORT || 3034, 'tracker')
 };
 
 // API路由 - 代理到各个微服务
@@ -217,10 +217,10 @@ app.use('/api/tracker', authenticateToken, serviceProxies.tracker);
 // 特殊路由 - 用于服务管理和监控
 app.get('/api/services/status', authenticateToken, async (req, res) => {
   const services = {
-    collector: await serviceHealthCheck('collector', `http://localhost:${process.env.COLLECTOR_PORT || 3001}`),
-    aiProcessor: await serviceHealthCheck('ai-processor', `http://localhost:${process.env.AI_PROCESSOR_PORT || 3002}`),
-    publisher: await serviceHealthCheck('publisher', `http://localhost:${process.env.PUBLISHER_PORT || 3003}`),
-    tracker: await serviceHealthCheck('tracker', `http://localhost:${process.env.TRACKER_PORT || 3004}`)
+    collector: await serviceHealthCheck('collector', `http://localhost:${process.env.COLLECTOR_PORT || 3031}`),
+    aiProcessor: await serviceHealthCheck('ai-processor', `http://localhost:${process.env.AI_PROCESSOR_PORT || 3032}`),
+    publisher: await serviceHealthCheck('publisher', `http://localhost:${process.env.PUBLISHER_PORT || 3033}`),
+    tracker: await serviceHealthCheck('tracker', `http://localhost:${process.env.TRACKER_PORT || 3034}`)
   };
 
   res.json({

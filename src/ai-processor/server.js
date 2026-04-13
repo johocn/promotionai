@@ -29,7 +29,7 @@ const logger = winston.createLogger({
 
 // 初始化Express应用
 const app = express();
-const PORT = process.env.AI_PROCESSOR_PORT || 3002;
+const PORT = process.env.AI_PROCESSOR_PORT || 3032;
 
 // 启用请求体解析
 app.use(express.json({ limit: '10mb' }));

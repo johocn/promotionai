@@ -1,0 +1,39 @@
+{
+  "name": "promotionai-web-admin",
+  "version": "1.0.0",
+  "description": "PromotionAI 智能营销系统管理后台",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --open --host",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview --open",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix"
+  },
+  "dependencies": {
+    "vue": "^3.4.37",
+    "vue-router": "^4.4.5",
+    "pinia": "^2.2.2",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "axios": "^1.7.7",
+    "element-plus": "^2.10.7",
+    "@element-plus/icons-vue": "^2.3.2",
+    "dayjs": "^1.11.13",
+    "echarts": "^5.5.1",
+    "vue-echarts": "^7.0.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "vite": "^5.4.8",
+    "@types/node": "^22.7.4",
+    "sass": "^1.79.4",
+    "typescript": "^5.6.2",
+    "vue-tsc": "^2.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
